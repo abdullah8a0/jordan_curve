@@ -1,47 +1,30 @@
-import math
+import numpy as np
 import matplotlib.pyplot as plt
 
-Percision = 0.1
-Points = [[1,1],[1,-1],[-1,-1],[-1,1]]
-Order = [[0,1],[1,2],[2,3],[3,0]]
+PERCISION = 0.1
+M90 = np.array([[0,-1],[1,0]])
 
-def R(point,centerPoint,angle = 90):
-    angle = math.radians(angle)
-    temp_point = [point[0]-centerPoint[0] , point[1]-centerPoint[1]]
-    temp_point = [temp_point[0]*math.cos(angle)-temp_point[1]*math.sin(angle) , temp_point[0]*math.sin(angle)+temp_point[1]*math.cos(angle)]
-    temp_point = [temp_point[0]+centerPoint[0] , temp_point[1]+centerPoint[1]]
-    return temp_point
+def R(polygon,pivot):
+    print((polygon - pivot)/2)
+    return (pivot + polygon)/2 + np.matmul(((polygon - pivot)/2),M90)
 
-def mid(a, b):
-    Ax, Ay = a[0], a[1]
-    Bx, By = b[0], b[1]
-    Cx = (Ax + Bx) / 2
-    Cy = (Ay + By) / 2
-    return [Cx, Cy]
 
-def Sigma(p, q):
-    return [S1(p, q), S2(p, q)]
+def isinside(polygon,point):    # parrallelize
+    x,y = point
+    inside = sum( y1>=y>=y2 or y2>=y>=y1 for x1,y1,x2,y2 in np.concatenate((polygon,np.roll(polygon,1)),axis=1) if x1>=x or x2>=x)%2 == 1
+    return inside
 
-def S1(p, q):
-    m = mid(p, q)
-    return R(p, m)
+def mobius_plot():
+    pass
 
-def S2(p, q):
-    m = mid(p, q)
-    return R(q, m)
+if __name__ == '__main__':
+    boundary = np.array([[1,1],[1,-2],[-1,-1],[-1,1]])
 
-def Slice():
-    for index,i in enumerate(Points):
-        bef = i
-        aft = Points[(index + 1)%(len(Points)-1)]
-        new = mid(bef, aft)
-        Points.append(new)
-    return
-Slice()
-print("Sliced")
-Px = [Points[x][0] for x in range(len(Points))]
-Py = [Points[y][1] for y in range(len(Points))]
-print("Ordered")
-plt.plot(Px,Py,"ro")
-plt.show()
-print(Points)
+    print(boundary)
+    rot = R(boundary,np.array([1,1]))
+    Px = boundary[:,0]
+    Py = boundary[:,1]
+    plt.plot(Px,Py,"ro")
+    plt.plot(rot[:,0],rot[:,1],"bo")
+    plt.axis("scaled")
+    plt.show()
